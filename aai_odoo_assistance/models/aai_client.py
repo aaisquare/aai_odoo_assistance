@@ -100,8 +100,24 @@ class AaiClient(models.AbstractModel):
             data = {}
         if response.status_code >= 400:
             message = data.get('message') or data.get('detail') or _('AI service error (%s).', response.status_code)
-            raise UserError(message if isinstance(message, str) else json.dumps(message))
+            message = message if isinstance(message, str) else json.dumps(message)
+            if signed and response.status_code == 401 and 'already received' not in message:
+                # the AAI service does not know this activation any more (installation removed, new secret,
+                # licence changed...): forget it here too, so Settings shows "Activate" again
+                self._forget_activation(message)
+            raise UserError(message)
         return data
+
+    def _forget_activation(self, message):
+        """Clear the local activation in its own transaction: the UserError raised next rolls back the
+        current one, which would otherwise undo this."""
+        _logger.warning('AAI service rejected the activation of this database: %s', message)
+        with self.env.registry.cursor() as cr:
+            params = self.env(cr=cr)['ir.config_parameter'].sudo()
+            params.set_param(PARAM_SECRET, False)
+            params.set_param(PARAM_STATUS, json.dumps({'status': 'inactive', 'message': message,
+                                                       'checked_at': int(time.time())}))
+        self.env.registry.clear_cache()   # hide the app menu again
 
     # -------------------------------------------------------------- licence
 
