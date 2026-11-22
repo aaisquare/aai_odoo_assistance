@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useEffect, useExternalListener, useRef, useState } from "@odoo/owl";
+import { Component, markup, onWillStart, useEffect, useExternalListener, useRef, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { rpc } from "@web/core/network/rpc";
@@ -8,7 +8,8 @@ import { user } from "@web/core/user";
 import { _t } from "@web/core/l10n/translation";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { session } from "@web/session";
-import { renderMarkdown } from "./markdown";
+import { escape } from "@web/core/utils/strings";
+import { linkify, renderMarkdown } from "./markdown";
 
 const GROUP = "aai_odoo_assistance.group_aai_assistant_user";
 const PAGE_ACTION = "aai_odoo_assistance.action_aai_assistant_chat";
@@ -129,7 +130,14 @@ export class AiAssistantChat extends Component {
     }
 
     renderContent(msg) {
-        return msg.role === "assistant" ? renderMarkdown(msg.content) : msg.content;
+        if (msg.role === "assistant") {
+            return renderMarkdown(msg.content);
+        }
+        if (msg.role === "error") {
+            // service messages (demo used up, licence expired...) may contain a link: make it clickable
+            return markup(linkify(escape(msg.content || "")));
+        }
+        return msg.content;
     }
 
     formatTime(msg) {
