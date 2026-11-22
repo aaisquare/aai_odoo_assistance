@@ -4,14 +4,14 @@
         <field name="name">aai.assistant.conversation.tree</field>
         <field name="model">aai.assistant.conversation</field>
         <field name="arch" type="xml">
-            <tree create="false">
+            <list create="false">
                 <field name="create_date" string="Started"/>
                 <field name="write_date" string="Last activity"/>
                 <field name="user_id"/>
                 <field name="name"/>
                 <field name="message_count"/>
                 <field name="company_id" groups="base.group_multi_company"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -32,14 +32,14 @@
                         </group>
                     </group>
                     <field name="message_ids">
-                        <tree decoration-muted="role == 'data_request'" decoration-info="role == 'user'">
+                        <list decoration-muted="role == 'data_request'" decoration-info="role == 'user'">
                             <field name="create_date" string="Time"/>
                             <field name="role"/>
                             <field name="request_model"/>
                             <field name="request_method"/>
                             <field name="result_count" string="Records"/>
                             <field name="content"/>
-                        </tree>
+                        </list>
                         <form>
                             <group>
                                 <field name="role"/>
@@ -73,7 +73,7 @@
     <record id="action_aai_assistant_conversation" model="ir.actions.act_window">
         <field name="name">AI Assistant Conversations</field>
         <field name="res_model">aai.assistant.conversation</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <menuitem id="menu_aai_assistant_conversation"

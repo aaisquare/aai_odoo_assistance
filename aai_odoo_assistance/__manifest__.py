@@ -1,6 +1,6 @@
 {
     'name': 'AI Assistant by AAI Square',
-    'version': '17.0.1.0.0',
+    'version': '18.0.1.0.0',
     'summary': 'Ask questions about your Odoo data in plain language',
     'description': """
 AI Assistant by AAI Square

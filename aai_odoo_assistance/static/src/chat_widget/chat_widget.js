@@ -3,6 +3,8 @@
 import { Component, onWillStart, useEffect, useExternalListener, useRef, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { rpc } from "@web/core/network/rpc";
+import { user } from "@web/core/user";
 import { _t } from "@web/core/l10n/translation";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { session } from "@web/session";
@@ -57,8 +59,8 @@ export class AiAssistantChat extends Component {
     };
 
     setup() {
-        this.rpc = useService("rpc");
-        this.user = useService("user");
+        this.rpc = rpc;     // Odoo 18: the "rpc" and "user" services became plain imports
+        this.user = user;
         this.notification = useService("notification");
         this.suggestionGroups = SUGGESTION_GROUPS;
         this.state = useState({
@@ -196,7 +198,7 @@ export class AiAssistantChat extends Component {
 
     openInNewTab() {
         const query = this.state.conversationId ? `?${URL_PARAM}=${this.state.conversationId}` : "";
-        window.open(`/web${query}#action=${PAGE_ACTION}`, "_blank", "noopener");
+        window.open(`/odoo/action-${PAGE_ACTION}${query}`, "_blank", "noopener");
         this.state.open = false;
     }
 

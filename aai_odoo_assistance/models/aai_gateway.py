@@ -129,14 +129,14 @@ class AaiGateway(models.AbstractModel):
 
         if (model, method) in EXTRA_METHODS:
             return getattr(Model, method)()
-        if method == 'check_access_rights':
-            return Model.check_access_rights(kw.get('operation', 'read'), raise_exception=False)
+        if method == 'check_access_rights':          # name kept for the backend; Odoo 18 API: has_access
+            return Model.has_access(kw.get('operation', 'read'))
         if method == 'fields_get':
             names = kw.get('fields')
             info = Model.fields_get(names, attributes=['string', 'type', 'selection', 'relation'])
             return {k: v for k, v in info.items() if not BLOCKED_FIELD.search(k)}
 
-        Model.check_access_rights('read')
+        Model.check_access('read')
         domain = kw.get('domain') or []
         if method == 'search_count':
             return Model.search_count(domain)
