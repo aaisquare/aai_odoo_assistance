@@ -63,7 +63,7 @@
             <search>
                 <field name="name"/>
                 <field name="user_id"/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter name="group_user" string="User" context="{'group_by': 'user_id'}"/>
                 </group>
             </search>

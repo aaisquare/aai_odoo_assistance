@@ -155,6 +155,7 @@ class AaiGateway(models.AbstractModel):
             for spec in aggregates + groupby:
                 if BLOCKED_FIELD.search(spec.split(':')[0]):
                     raise AccessError(_('This data is not available to the AI Assistant.'))
+            # Odoo 19 deprecates read_group (still supported); the backend expects its result format
             return Model.read_group(domain, aggregates, groupby, offset=int(kw.get('offset') or 0),
                                     limit=self._limit(kw.get('limit')), orderby=kw.get('orderby') or False,
                                     lazy=bool(kw.get('lazy', False)))

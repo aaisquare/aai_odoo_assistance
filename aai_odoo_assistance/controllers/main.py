@@ -11,7 +11,7 @@ class AiAssistantController(http.Controller):
         if not request.env.user.has_group(GROUP):
             raise AccessError('You are not allowed to use the AI Assistant.')
 
-    @http.route('/aai_odoo_assistance/chat', type='json', auth='user')
+    @http.route('/aai_odoo_assistance/chat', type='jsonrpc', auth='user')
     def chat(self, message, conversation_id=None):
         self._check_group()
         try:
@@ -19,7 +19,7 @@ class AiAssistantController(http.Controller):
         except (UserError, AccessError) as e:
             return {'error': str(e)}
 
-    @http.route('/aai_odoo_assistance/history', type='json', auth='user')
+    @http.route('/aai_odoo_assistance/history', type='jsonrpc', auth='user')
     def history(self, conversation_id=None):
         """Messages to show when the chat opens.
 
