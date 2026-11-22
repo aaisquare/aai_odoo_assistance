@@ -33,7 +33,7 @@ Odoo looks for modules **directly inside** each folder of its `addons_path`, so 
 **Option A: copy the module into your custom addons folder** (simplest)
 
 ```bash
-git clone -b 17.0 --single-branch {REPO_URL}.git /tmp/aai_odoo_assistance
+git clone -b 17.0 --single-branch https://github.com/aaisquare/aai_odoo_assistance.git /tmp/aai_odoo_assistance
 cp -r /tmp/aai_odoo_assistance/aai_odoo_assistance /path/to/your/custom-addons/
 ```
 
@@ -43,7 +43,7 @@ On Windows, copy the inner `aai_odoo_assistance` folder with the file explorer.
 
 ```bash
 cd /opt/odoo
-git clone -b 17.0 --single-branch {REPO_URL}.git
+git clone -b 17.0 --single-branch https://github.com/aaisquare/aai_odoo_assistance.git
 ```
 
 then in your Odoo configuration file (e.g. `odoo.conf`):

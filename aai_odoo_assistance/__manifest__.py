@@ -25,6 +25,7 @@ sent to AAI Square to register this database for the licence.
     'author': 'AAI Square',
     'website': 'https://aaisquare.com/',
     'maintainer': 'AAI Square',
+    'support': 'odoo@aaisquare.com',
     'license': 'OPL-1',
     'images': ['static/description/banner.png'],
     'depends': ['base_setup', 'web'],
