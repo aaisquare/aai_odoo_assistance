@@ -62,7 +62,7 @@
                         </setting>
                         <setting id="aai_backend_url" string="AI Service URL" groups="base.group_no_one"
                                  help="Developer mode only. Leave empty to use the AAI Square service.">
-                            <field name="aai_backend_url" placeholder="https://api.aaisquare.com"/>
+                            <field name="aai_backend_url" placeholder="https://odoo.aaisquare.com/assistance-backend"/>
                         </setting>
                     </block>
                 </app>
