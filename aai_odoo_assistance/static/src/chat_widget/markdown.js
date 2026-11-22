@@ -8,15 +8,33 @@ import { escape } from "@web/core/utils/strings";
  *
  * The text is HTML-escaped first, then only a small whitelist of constructs is
  * turned into tags: paragraphs, line breaks, bullet / numbered lists (with one
- * level of nesting), headings (rendered as bold lines), **bold**, *italic*
- * and `code`.
+ * level of nesting), headings (rendered as bold lines), **bold**, *italic*,
+ * `code` and http(s) links.
  */
+
+// http(s) address in already-escaped text; trailing punctuation (". , ; : ! ? )") is not part of it
+const URL_RE = /\bhttps?:\/\/[^\s<>"']+[^\s<>"'.,;:!?)]/g;
+
+export function linkify(escapedText) {
+    return escapedText.replace(
+        URL_RE,
+        (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`
+    );
+}
+
 function renderInline(text) {
-    return text
+    // links first, kept out of the other rules (an URL may contain _ or *)
+    const links = [];
+    const withTokens = text.replace(URL_RE, (url) => {
+        links.push(url);
+        return `\u0000${links.length - 1}\u0000`;
+    });
+    return withTokens
         .replace(/`([^`]+)`/g, "<code>$1</code>")
         .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
         .replace(/__([^_]+)__/g, "<strong>$1</strong>")
-        .replace(/(^|[\s(])\*([^*\s][^*]*?)\*(?=[\s).,;:!?]|$)/g, "$1<em>$2</em>");
+        .replace(/(^|[\s(])\*([^*\s][^*]*?)\*(?=[\s).,;:!?]|$)/g, "$1<em>$2</em>")
+        .replace(/\u0000(\d+)\u0000/g, (m, i) => linkify(links[Number(i)]));
 }
 
 const LIST_ITEM = /^(\s*)(?:([-*•])|(\d+)[.)])\s+(.*)$/;
