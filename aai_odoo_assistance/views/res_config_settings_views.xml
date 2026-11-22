@@ -9,6 +9,7 @@
                 <app data-string="AI Assistant" string="AI Assistant" name="aai_odoo_assistance" groups="base.group_system">
                     <block title="Subscription" name="aai_assistant_subscription">
                         <field name="aai_is_activated" invisible="1"/>
+                        <field name="aai_key_changed" invisible="1"/>
                         <div class="alert alert-warning w-100 mb-3" role="alert" invisible="aai_is_activated">
                             <strong>The AI Assistant is not activated yet.</strong>
                             Click <strong>Activate</strong> below to turn it on: the chat window and the
@@ -19,10 +20,19 @@
                                  help="The key provided by AAI Square for your subscription.">
                             <field name="aai_license_key" password="True" placeholder="AAI-XXXX-XXXX-XXXX"/>
                             <div class="mt-2">
+                                <!-- Activate: only needed before the first activation or for a new key -->
                                 <button name="action_aai_activate" type="object" string="Activate"
-                                        class="btn-primary" icon="fa-check"/>
+                                        class="btn-primary" icon="fa-check"
+                                        invisible="aai_is_activated and not aai_key_changed"/>
+                                <span class="text-success fw-bold me-3"
+                                      invisible="not aai_is_activated or aai_key_changed">
+                                    <i class="fa fa-check-circle me-1" title="Activated"/>Activated for this database
+                                </span>
                                 <button name="action_aai_check_status" type="object" string="Check Status"
                                         class="btn-link" icon="fa-refresh" invisible="not aai_status"/>
+                            </div>
+                            <div class="text-warning small mt-1" invisible="not aai_is_activated or not aai_key_changed">
+                                New key: click <strong>Activate</strong> to use it.
                             </div>
                         </setting>
                         <setting id="aai_license_status" string="Status">
