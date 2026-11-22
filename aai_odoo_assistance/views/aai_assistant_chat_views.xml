@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Full-page chat: opened in a new tab from the chat popup, or from the AI Assistant app menu -->
+    <record id="action_aai_assistant_chat" model="ir.actions.client">
+        <field name="name">AI Assistant</field>
+        <field name="tag">aai_odoo_assistance.chat_page</field>
+    </record>
+
+    <menuitem id="menu_aai_assistant_root"
+              name="AI Assistant"
+              action="action_aai_assistant_chat"
+              web_icon="aai_odoo_assistance,static/description/icon.png"
+              groups="aai_odoo_assistance.group_aai_assistant_user"
+              sequence="200"/>
+</odoo>

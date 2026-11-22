@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_aai_assistant" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.aai.assistant</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="AI Assistant" string="AI Assistant" name="aai_odoo_assistance" groups="base.group_system">
+                    <block title="Subscription" name="aai_assistant_subscription">
+                        <field name="aai_is_activated" invisible="1"/>
+                        <div class="alert alert-warning w-100 mb-3" role="alert" invisible="aai_is_activated">
+                            <strong>The AI Assistant is not activated yet.</strong>
+                            Click <strong>Activate</strong> below to turn it on: the chat window and the
+                            AI Assistant app then appear for the users of the <em>AI Assistant User</em> group.
+                            A free demo key is already filled in; replace it with your subscription key if you have one.
+                        </div>
+                        <setting id="aai_license_key" string="Licence Key"
+                                 help="The key provided by AAI Square for your subscription.">
+                            <field name="aai_license_key" password="True" placeholder="AAI-XXXX-XXXX-XXXX"/>
+                            <div class="mt-2">
+                                <button name="action_aai_activate" type="object" string="Activate"
+                                        class="btn-primary" icon="fa-check"/>
+                                <button name="action_aai_check_status" type="object" string="Check Status"
+                                        class="btn-link" icon="fa-refresh" invisible="not aai_status"/>
+                            </div>
+                        </setting>
+                        <setting id="aai_license_status" string="Status">
+                            <div>
+                                <field name="aai_is_active" invisible="1"/>
+                                <field name="aai_status" widget="badge" nolabel="1"
+                                       decoration-success="aai_is_active" decoration-warning="not aai_is_active"/>
+                            </div>
+                            <div class="text-muted" invisible="not aai_status_message">
+                                <field name="aai_status_message" nolabel="1"/>
+                            </div>
+                            <div class="mt-1" invisible="not aai_plan">
+                                Plan: <field name="aai_plan" nolabel="1" class="fw-bold"/>
+                            </div>
+                            <div invisible="not aai_valid_until">
+                                Valid until: <field name="aai_valid_until" nolabel="1" class="fw-bold"/>
+                            </div>
+                            <div invisible="not aai_questions_left">
+                                Questions left: <field name="aai_questions_left" nolabel="1" class="fw-bold"/>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Chat" name="aai_assistant_chat">
+                        <setting id="aai_load_history"
+                                 help="When opening the chat, show the user's last conversation. Unchecked: every time the chat opens, a new conversation starts.">
+                            <field name="aai_load_history"/>
+                        </setting>
+                        <setting id="aai_backend_url" string="AI Service URL" groups="base.group_no_one"
+                                 help="Developer mode only. Leave empty to use the AAI Square service.">
+                            <field name="aai_backend_url" placeholder="https://api.aaisquare.com"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

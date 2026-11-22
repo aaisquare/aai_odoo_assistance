@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ai_conversation_user,aai.assistant.conversation user,model_aai_assistant_conversation,group_aai_assistant_user,1,1,1,0
+access_ai_message_user,aai.assistant.message user,model_aai_assistant_message,group_aai_assistant_user,1,0,1,0
+access_ai_conversation_admin,aai.assistant.conversation admin,model_aai_assistant_conversation,base.group_system,1,1,1,1
+access_ai_message_admin,aai.assistant.message admin,model_aai_assistant_message,base.group_system,1,1,1,1

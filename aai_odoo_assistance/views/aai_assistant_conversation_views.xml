@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="aai_assistant_conversation_view_tree" model="ir.ui.view">
+        <field name="name">aai.assistant.conversation.tree</field>
+        <field name="model">aai.assistant.conversation</field>
+        <field name="arch" type="xml">
+            <tree create="false">
+                <field name="create_date" string="Started"/>
+                <field name="write_date" string="Last activity"/>
+                <field name="user_id"/>
+                <field name="name"/>
+                <field name="message_count"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="aai_assistant_conversation_view_form" model="ir.ui.view">
+        <field name="name">aai.assistant.conversation.form</field>
+        <field name="model">aai.assistant.conversation</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="user_id"/>
+                        </group>
+                        <group>
+                            <field name="create_date" string="Started"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <field name="message_ids">
+                        <tree decoration-muted="role == 'data_request'" decoration-info="role == 'user'">
+                            <field name="create_date" string="Time"/>
+                            <field name="role"/>
+                            <field name="request_model"/>
+                            <field name="request_method"/>
+                            <field name="result_count" string="Records"/>
+                            <field name="content"/>
+                        </tree>
+                        <form>
+                            <group>
+                                <field name="role"/>
+                                <field name="content"/>
+                                <field name="request_model" invisible="role != 'data_request'"/>
+                                <field name="request_method" invisible="role != 'data_request'"/>
+                                <field name="request_details" invisible="role != 'data_request'"/>
+                                <field name="result_count" invisible="role != 'data_request'"/>
+                            </group>
+                        </form>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="aai_assistant_conversation_view_search" model="ir.ui.view">
+        <field name="name">aai.assistant.conversation.search</field>
+        <field name="model">aai.assistant.conversation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="user_id"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_user" string="User" context="{'group_by': 'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_aai_assistant_conversation" model="ir.actions.act_window">
+        <field name="name">AI Assistant Conversations</field>
+        <field name="res_model">aai.assistant.conversation</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_aai_assistant_conversation"
+              name="AI Assistant Logs"
+              parent="base.menu_administration"
+              action="action_aai_assistant_conversation"
+              groups="base.group_system"
+              sequence="90"/>
+</odoo>

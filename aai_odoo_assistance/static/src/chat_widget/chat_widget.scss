@@ -1,0 +1,636 @@
+// AI Assistant chat widget
+// Colours come from Odoo's theme variables so it follows the company colours and dark mode.
+
+$ai-accent: $o-brand-primary;
+// Accent for icons / text on neutral backgrounds. Odoo Enterprise compiles this file a second
+// time for dark mode with a light $o-main-text-color, so this mix is darker in light mode and
+// lighter in dark mode: readable in both.
+$ai-accent-text: mix($ai-accent, $o-main-text-color, 60%);
+$ai-radius: 16px;
+$ai-surface: $o-view-background-color;
+$ai-muted-surface: mix($o-view-background-color, $o-main-text-color, 94%);
+$ai-border: mix($o-view-background-color, $o-main-text-color, 88%);
+
+// full-page client action container
+.o_aai_assistant_page {
+    height: 100%;
+    overflow: hidden;
+}
+
+.o_aai_assistant_denied {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 24px;
+    color: $text-muted;
+    text-align: center;
+}
+
+// the floating launcher is redundant on the full-page chat
+body:has(.o_aai_assistant_fullpage) .o_aai_assistant_floating {
+    display: none;
+}
+
+@keyframes o_aai_assistant_pop {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes o_aai_assistant_fade_up {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes o_aai_assistant_dot {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
+    40% { transform: translateY(-4px); opacity: 1; }
+}
+
+.o_aai_assistant {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 1055;
+    font-size: 0.875rem;
+
+    // ------------------------------------------------------------ launcher
+    .o_aai_assistant_launcher {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 48px;
+        padding: 0 20px 0 16px;
+        border: 0;
+        border-radius: 24px;
+        color: #fff;
+        background: linear-gradient(135deg, $ai-accent, darken($ai-accent, 12%));
+        box-shadow: 0 8px 24px rgba($ai-accent, 0.35), 0 2px 6px rgba(0, 0, 0, 0.12);
+        font-weight: 600;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+        .fa { font-size: 1.15rem; }
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba($ai-accent, 0.45), 0 3px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        &:focus-visible {
+            outline: 3px solid rgba($ai-accent, 0.4);
+            outline-offset: 2px;
+        }
+    }
+
+    // --------------------------------------------------------------- panel
+    .o_aai_assistant_panel {
+        display: flex;
+        flex-direction: column;
+        width: 400px;
+        height: 620px;
+        max-width: calc(100vw - 32px);
+        max-height: calc(100vh - 96px);
+        background: $ai-surface;
+        border: 1px solid $ai-border;
+        border-radius: $ai-radius;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        animation: o_aai_assistant_pop 0.18s ease-out;
+        transition: width 0.2s ease, height 0.2s ease;
+
+        &.o_aai_assistant_expanded {
+            width: 720px;
+            height: calc(100vh - 96px);
+        }
+    }
+
+    // -------------------------------------------------------------- header
+    .o_aai_assistant_header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 12px 14px 16px;
+        color: #fff;
+        background: linear-gradient(135deg, $ai-accent, darken($ai-accent, 12%));
+
+        .o_aai_assistant_avatar_bot {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+    }
+
+    .o_aai_assistant_title {
+        flex: 1 1 auto;
+        min-width: 0;
+        line-height: 1.25;
+    }
+
+    .o_aai_assistant_name {
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .o_aai_assistant_status {
+        font-size: 0.75rem;
+        opacity: 0.85;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .o_aai_assistant_header_actions {
+        display: flex;
+        gap: 2px;
+    }
+
+    .o_aai_assistant_icon_btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: 0;
+        border-radius: 8px;
+        color: #fff;
+        background: transparent;
+        opacity: 0.9;
+
+        &:hover:not(:disabled) { background: rgba(255, 255, 255, 0.18); opacity: 1; }
+        &:disabled { opacity: 0.4; }
+    }
+
+    // ------------------------------------------------------------- avatars
+    .o_aai_assistant_avatar {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        font-size: 0.85rem;
+    }
+
+    .o_aai_assistant_avatar_bot {
+        color: $ai-accent-text;
+        background: rgba($ai-accent, 0.12);
+    }
+
+    .o_aai_assistant_avatar_error {
+        color: $danger;
+        background: rgba($danger, 0.12);
+    }
+
+    // ------------------------------------------------------------ messages
+    .o_aai_assistant_messages {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 16px;
+        background: $ai-muted-surface;
+        scroll-behavior: smooth;
+    }
+
+    .o_aai_assistant_msg {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        margin-bottom: 14px;
+        animation: o_aai_assistant_fade_up 0.2s ease-out;
+    }
+
+    .o_aai_assistant_body {
+        display: flex;
+        flex-direction: column;
+        max-width: 82%;
+        min-width: 0;
+    }
+
+    .o_aai_assistant_bubble {
+        padding: 10px 14px;
+        border-radius: $ai-radius;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .o_aai_assistant_meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+        padding: 0 4px;
+        font-size: 0.7rem;
+        color: $text-muted;
+    }
+
+    .o_aai_assistant_copy {
+        border: 0;
+        padding: 0;
+        background: none;
+        color: inherit;
+        font-size: inherit;
+        opacity: 0;
+        transition: opacity 0.15s;
+
+        &:hover { color: $ai-accent-text; }
+    }
+
+    .o_aai_assistant_msg:hover .o_aai_assistant_copy,
+    .o_aai_assistant_copy:focus-visible {
+        opacity: 1;
+    }
+
+    // user
+    .o_aai_assistant_msg_user {
+        flex-direction: row-reverse;
+
+        .o_aai_assistant_body { align-items: flex-end; }
+
+        .o_aai_assistant_bubble {
+            color: #fff;
+            background: $ai-accent;
+            border-bottom-right-radius: 4px;
+            white-space: pre-wrap;
+        }
+    }
+
+    // assistant
+    .o_aai_assistant_msg_assistant .o_aai_assistant_bubble {
+        color: $o-main-text-color;
+        background: $ai-surface;
+        border: 1px solid $ai-border;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    // error
+    .o_aai_assistant_msg_error .o_aai_assistant_bubble {
+        color: darken($danger, 10%);
+        background: rgba($danger, 0.08);
+        border: 1px solid rgba($danger, 0.25);
+        border-bottom-left-radius: 4px;
+        white-space: pre-wrap;
+    }
+
+    // formatted answer text
+    .o_aai_assistant_text {
+        p { margin: 0 0 8px; }
+        p:last-child, ul:last-child, ol:last-child { margin-bottom: 0; }
+        ul, ol { margin: 0 0 8px; padding-left: 20px; }
+        li { margin-bottom: 3px; }
+        li::marker { color: $ai-accent-text; }
+        strong { font-weight: 600; }
+        code {
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: inherit;
+            background: rgba($ai-accent, 0.1);
+        }
+        .o_aai_assistant_heading { margin-top: 4px; }
+    }
+
+    // ---------------------------------------------------- files & records
+    .o_aai_assistant_files {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    .o_aai_assistant_file {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border: 1px solid $ai-border;
+        border-radius: 10px;
+        color: $o-main-text-color;
+        background: $ai-muted-surface;
+        text-decoration: none;
+        transition: border-color 0.15s, background 0.15s;
+
+        &:hover {
+            border-color: $ai-accent;
+            background: rgba($ai-accent, 0.06);
+
+            .o_aai_assistant_file_action { color: $ai-accent-text; }
+        }
+    }
+
+    .o_aai_assistant_file_icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        color: #fff;
+        background: #e5484d;
+        font-size: 1rem;
+    }
+
+    .o_aai_assistant_file_name {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 500;
+    }
+
+    .o_aai_assistant_file_action {
+        color: $text-muted;
+    }
+
+    .o_aai_assistant_records {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    // -------------------------------------------------------------- typing
+    .o_aai_assistant_typing {
+        display: inline-flex;
+        gap: 4px;
+        padding: 14px 16px;
+
+        span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: $ai-accent;
+            animation: o_aai_assistant_dot 1.2s infinite ease-in-out;
+
+            &:nth-child(2) { animation-delay: 0.15s; }
+            &:nth-child(3) { animation-delay: 0.3s; }
+        }
+    }
+
+    // ------------------------------------------------------------- welcome
+    .o_aai_assistant_welcome {
+        padding: 12px 4px;
+        text-align: center;
+        animation: o_aai_assistant_fade_up 0.25s ease-out;
+    }
+
+    .o_aai_assistant_welcome_icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+        margin-bottom: 12px;
+        border-radius: 16px;
+        color: #fff;
+        font-size: 1.5rem;
+        background: linear-gradient(135deg, $ai-accent, darken($ai-accent, 12%));
+        box-shadow: 0 8px 20px rgba($ai-accent, 0.3);
+    }
+
+    .o_aai_assistant_suggestions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        text-align: left;
+    }
+
+    .o_aai_assistant_suggestion_title {
+        margin-bottom: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: $text-muted;
+    }
+
+    .o_aai_assistant_suggestion_group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .o_aai_assistant_chip {
+        display: inline-flex;
+        align-items: center;
+        max-width: 100%;
+        padding: 6px 12px;
+        border: 1px solid $ai-border;
+        border-radius: 999px;
+        color: $o-main-text-color;
+        background: $ai-surface;
+        font-size: 0.8rem;
+        text-align: left;
+        text-decoration: none;
+        transition: border-color 0.15s, color 0.15s, background 0.15s;
+
+        &:hover {
+            border-color: $ai-accent;
+            color: $ai-accent-text;
+            background: rgba($ai-accent, 0.06);
+        }
+    }
+
+    // ------------------------------------------------------------ composer
+    .o_aai_assistant_composer {
+        padding: 10px 12px 8px;
+        border-top: 1px solid $ai-border;
+        background: $ai-surface;
+    }
+
+    .o_aai_assistant_input_wrap {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        padding: 6px 6px 6px 14px;
+        border: 1px solid $ai-border;
+        border-radius: 14px;
+        background: $ai-surface;
+        transition: border-color 0.15s, box-shadow 0.15s;
+
+        &:focus-within {
+            border-color: $ai-accent;
+            box-shadow: 0 0 0 3px rgba($ai-accent, 0.15);
+        }
+
+        textarea {
+            flex: 1 1 auto;
+            min-height: 24px;
+            max-height: 140px;
+            padding: 6px 0;
+            border: 0;
+            outline: 0;
+            resize: none;
+            color: $o-main-text-color;
+            background: transparent;
+            line-height: 1.4;
+
+            &:disabled { opacity: 0.6; }
+        }
+    }
+
+    .o_aai_assistant_send {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        width: 36px;
+        height: 36px;
+        border: 0;
+        border-radius: 10px;
+        color: #fff;
+        background: $ai-accent;
+        transition: background 0.15s, opacity 0.15s;
+
+        &:hover:not(:disabled) { background: darken($ai-accent, 8%); }
+        &:disabled { opacity: 0.35; cursor: not-allowed; }
+    }
+
+    .o_aai_assistant_hint {
+        margin-top: 6px;
+        font-size: 0.68rem;
+        color: $text-muted;
+        text-align: center;
+
+        kbd {
+            padding: 0 4px;
+            border: 1px solid $ai-border;
+            border-radius: 3px;
+            color: inherit;
+            background: $ai-muted-surface;
+            font-size: 0.65rem;
+            box-shadow: none;
+        }
+    }
+
+    // ----------------------------------------------------------- full page
+    // Edge-to-edge page: no card, no outer margin. Content sits in a centred
+    // reading column ($ai-column) while backgrounds span the full width.
+    $ai-column: 900px;
+    $ai-gutter: unquote("max(24px, calc((100% - #{$ai-column}) / 2))");
+
+    &.o_aai_assistant_fullpage {
+        position: static;
+        height: 100%;
+
+        .o_aai_assistant_panel {
+            width: 100%;
+            max-width: none;
+            height: 100%;
+            max-height: none;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+            animation: none;
+        }
+
+        // slim toolbar instead of the big gradient header (Odoo's top bar already shows the title)
+        .o_aai_assistant_header {
+            padding: 6px $ai-gutter;
+            color: $o-main-text-color;
+            background: $ai-surface;
+            border-bottom: 1px solid $ai-border;
+
+            .o_aai_assistant_avatar,
+            .o_aai_assistant_name {
+                display: none;
+            }
+
+            .o_aai_assistant_status {
+                font-size: 0.8rem;
+                color: $text-muted;
+                opacity: 1;
+            }
+
+            .o_aai_assistant_icon_btn {
+                width: auto;
+                padding: 0 10px;
+                gap: 6px;
+                color: $o-main-text-color;
+
+                &:hover:not(:disabled) { background: $ai-muted-surface; }
+            }
+        }
+
+        .o_aai_assistant_new_label {
+            display: inline;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .o_aai_assistant_messages {
+            display: flex;
+            flex-direction: column;
+            padding: 20px $ai-gutter;
+        }
+
+        .o_aai_assistant_body {
+            max-width: 80%;
+        }
+
+        // vertically centred in the empty space
+        .o_aai_assistant_welcome {
+            width: 100%;
+            max-width: 640px;
+            margin: auto;
+            padding: 0;
+        }
+
+        .o_aai_assistant_welcome_icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 10px;
+            font-size: 1.25rem;
+        }
+
+        .o_aai_assistant_suggestions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px 24px;
+        }
+
+        .o_aai_assistant_composer {
+            padding: 12px $ai-gutter 10px;
+        }
+    }
+
+    // -------------------------------------------------------------- mobile
+    @include media-breakpoint-down(md) {
+        &.o_aai_assistant_fullpage {
+            .o_aai_assistant_panel {
+                position: static;
+            }
+
+            .o_aai_assistant_header { padding: 6px 12px; }
+            .o_aai_assistant_new_label { display: none; }
+            .o_aai_assistant_messages { padding: 16px; }
+            .o_aai_assistant_body { max-width: 85%; }
+            .o_aai_assistant_suggestions { display: flex; }
+            .o_aai_assistant_composer { padding: 10px 12px 8px; }
+        }
+
+        right: 16px;
+        bottom: 16px;
+
+        .o_aai_assistant_launcher_label { display: none; }
+        .o_aai_assistant_launcher { padding: 0; width: 52px; height: 52px; justify-content: center; }
+
+        .o_aai_assistant_panel,
+        .o_aai_assistant_panel.o_aai_assistant_expanded {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100%;
+            max-width: none;
+            max-height: none;
+            border-radius: 0;
+            border: 0;
+        }
+
+        .o_aai_assistant_hint { display: none; }
+    }
+}
