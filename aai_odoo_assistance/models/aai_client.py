@@ -15,13 +15,13 @@ import time
 import requests
 
 from odoo import _, api, models, release
+from odoo.modules.module import get_manifest
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
 DEFAULT_BACKEND_URL = 'https://odoo.aaisquare.com/assistance-backend'
 TIMEOUT = 90
-MODULE_VERSION = '17.0.1.0.0'
 
 PARAM_KEY = 'aai_odoo_assistance.license_key'
 PARAM_SECRET = 'aai_odoo_assistance.client_secret'
@@ -56,7 +56,8 @@ class AaiClient(models.AbstractModel):
             'db_uuid': params.get_param('database.uuid'),
             'base_url': params.get_param('web.base.url'),
             'odoo_version': release.version,
-            'module_version': MODULE_VERSION,
+            # read from __manifest__.py, so it always matches the installed branch (17.0 / 18.0 / 19.0)
+            'module_version': get_manifest('aai_odoo_assistance').get('version') or '',
             'hostname': platform.node(),
         }
 
