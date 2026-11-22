@@ -33,6 +33,8 @@ class ResConfigSettings(models.TransientModel):
     aai_is_active = fields.Boolean(compute='_compute_aai_status')
     aai_is_activated = fields.Boolean(compute='_compute_aai_status',
                                       help='An administrator activated the assistant: the chat is visible.')
+    aai_key_changed = fields.Boolean(compute='_compute_aai_key_changed',
+                                     help='The key in the form differs from the saved one: it must be activated.')
 
     @api.depends('aai_license_key')
     def _compute_aai_status(self):
@@ -56,6 +58,12 @@ class ResConfigSettings(models.TransientModel):
             else:
                 # active plan without a question limit (Starter / Pro)
                 settings.aai_questions_left = _('Unlimited') if status == 'active' else False
+
+    @api.depends('aai_license_key')
+    def _compute_aai_key_changed(self):
+        saved = (self.env['ir.config_parameter'].sudo().get_param(PARAM_KEY) or '').strip()
+        for settings in self:
+            settings.aai_key_changed = (settings.aai_license_key or '').strip() != saved
 
     def set_values(self):
         params = self.env['ir.config_parameter'].sudo()
