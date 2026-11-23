@@ -82,8 +82,27 @@ every screen, and the **AI Assistant** app appears in the apps menu.
 
 ![Activated, with 20 demo questions left](aai_odoo_assistance/static/description/screenshots/activated.png)
 
-Who can use the chat: users in the **AI Assistant User** group (the administrator is added at installation).
-Add other users in Settings > Users > (user) > AI Assistant.
+### Give users access
+
+The chat is only shown to users with the **AI Assistant User** permission. At installation, only the
+main administrator (the `admin` user) gets it automatically: **other users, even other administrators,
+do not see the chat until you give them access.**
+
+1. Go to **Settings > Users & Companies > Users** and open the user.
+2. In the **Access Rights** tab, find the **AI ASSISTANT** section.
+3. Set **AI Assistant** to **AI Assistant User** and save.
+4. The user reloads the page: the **Ask AI** button and the **AI Assistant** app appear.
+
+![AI Assistant permission in the user form](aai_odoo_assistance/static/description/screenshots/user-access.png)
+
+### The chat is not visible?
+
+| Situation | What to do |
+|---|---|
+| No **Ask AI** button for anyone | The assistant is not activated: **Settings > AI Assistant > Activate** |
+| Visible for the administrator but not for another user | Give that user the **AI Assistant User** permission (see above) |
+| Permission just given, still not visible | Reload the page (or log out and in) |
+| "This database is not activated" in the chat | **Settings > AI Assistant > Activate** again |
 
 ## 3. Ask questions
 
