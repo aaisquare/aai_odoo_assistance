@@ -155,7 +155,14 @@ class AaiGateway(models.AbstractModel):
             for spec in aggregates + groupby:
                 if BLOCKED_FIELD.search(spec.split(':')[0]):
                     raise AccessError(_('This data is not available to the AI Assistant.'))
-            # Odoo 19 deprecates read_group (still supported); the backend expects its result format
+            # Odoo 19 marks read_group as deprecated (@api.deprecated) but keeps it as the method returning
+            # the formatted groups the backend expects. Call the undecorated base method to avoid the warning;
+            # a model overriding read_group (no __wrapped__) still goes through its override.
+            read_group = getattr(type(Model).read_group, '__wrapped__', None)
+            if read_group:
+                return read_group(Model, domain, aggregates, groupby, offset=int(kw.get('offset') or 0),
+                                  limit=self._limit(kw.get('limit')), orderby=kw.get('orderby') or False,
+                                  lazy=bool(kw.get('lazy', False)))
             return Model.read_group(domain, aggregates, groupby, offset=int(kw.get('offset') or 0),
                                     limit=self._limit(kw.get('limit')), orderby=kw.get('orderby') or False,
                                     lazy=bool(kw.get('lazy', False)))

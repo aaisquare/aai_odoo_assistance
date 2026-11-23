@@ -26,7 +26,7 @@ class AaiAssistant(models.AbstractModel):
         Conversation = self.env['aai.assistant.conversation']
         conversation = Conversation.browse(conversation_id).exists() if conversation_id else Conversation
         if conversation:
-            conversation.check_access_rule('write')
+            conversation.check_access('write')
             history = conversation._history_for_backend()
         else:
             conversation = Conversation.create({'name': user_message[:60]})
