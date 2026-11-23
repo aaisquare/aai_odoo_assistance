@@ -5,3 +5,5 @@ __pycache__/
 .vscode/
 # local development only
 nodemon.json
+nodemon17.json
+nodemon19.json
