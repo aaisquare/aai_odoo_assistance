@@ -4,7 +4,7 @@ Ask your Odoo anything in plain language. **AI Assistant** adds a chat window to
 about your sales, purchases, invoices, stock, customers and CRM from your **live data**, with the access
 rights of the user who asks.
 
-> This branch is for **Odoo 17.0** (Community and Enterprise). Other versions: branches `17.0`, `18.0`, `19.0`.
+> This branch is for **Odoo 17.0** (Community and Enterprise).
 
 ![AI Assistant answering a question](aai_odoo_assistance/static/description/banner.png)
 
