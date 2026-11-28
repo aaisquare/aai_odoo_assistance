@@ -1,6 +1,6 @@
 {
     'name': 'AI Assistant by AAI Square',
-    'version': '17.0.1.0.0',
+    'version': '16.0.1.0.2',
     'summary': 'Ask questions about your Odoo data in plain language',
     'description': """
 AI Assistant by AAI Square
@@ -38,8 +38,11 @@ sent to AAI Square to register this database for the licence.
     ],
     'assets': {
         'web.assets_backend': [
-            'aai_odoo_assistance/static/src/chat_widget/*',
-            'aai_odoo_assistance/static/src/settings/*',
+            'aai_odoo_assistance/static/src/chat_widget/markdown.js',
+            'aai_odoo_assistance/static/src/chat_widget/chat_widget.js',
+            'aai_odoo_assistance/static/src/chat_widget/chat_widget.xml',
+            'aai_odoo_assistance/static/src/chat_widget/chat_widget.scss',
+            'aai_odoo_assistance/static/src/settings/settings_reload.js',
         ],
     },
     'external_dependencies': {'python': ['requests']},

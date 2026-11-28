@@ -25,9 +25,9 @@ registry.category("actions").add("aai_odoo_assistance.reload_settings", (env, ac
     browser.location.reload();
 });
 
-patch(SettingsFormController.prototype, {
+patch(SettingsFormController.prototype, "aai_odoo_assistance.settings_reload", {
     setup() {
-        super.setup(...arguments);
+        this._super(...arguments);
         let pending = null;
         try {
             pending = JSON.parse(browser.sessionStorage.getItem(STORAGE_KEY) || "null");

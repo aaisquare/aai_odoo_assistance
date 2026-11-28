@@ -73,7 +73,7 @@ class ResConfigSettings(models.TransientModel):
             # a new key must be activated again: forget the old secret and status (hides the chat until then)
             params.set_param(PARAM_SECRET, False)
             params.set_param(PARAM_STATUS, False)
-            self.env.registry.clear_cache()   # app menu visibility
+            self.env['ir.ui.menu'].clear_caches()   # app menu visibility
 
     def action_aai_activate(self):
         self.set_values()

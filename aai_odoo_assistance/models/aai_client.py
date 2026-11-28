@@ -20,7 +20,8 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
-DEFAULT_BACKEND_URL = 'https://odoo.aaisquare.com/assistance-backend'
+DEFAULT_BACKEND_URL = 'http://localhost:8000/'
+# DEFAULT_BACKEND_URL = 'https://odoo.aaisquare.com/assistance-backend'
 TIMEOUT = 90
 
 PARAM_KEY = 'aai_odoo_assistance.license_key'
@@ -56,7 +57,7 @@ class AaiClient(models.AbstractModel):
             'db_uuid': params.get_param('database.uuid'),
             'base_url': params.get_param('web.base.url'),
             'odoo_version': release.version,
-            # read from __manifest__.py, so it always matches the installed branch (17.0 / 18.0 / 19.0)
+            # Read from __manifest__.py so it always matches the installed branch.
             'module_version': get_manifest('aai_odoo_assistance').get('version') or '',
             'hostname': platform.node(),
         }
@@ -118,7 +119,7 @@ class AaiClient(models.AbstractModel):
             params.set_param(PARAM_SECRET, False)
             params.set_param(PARAM_STATUS, json.dumps({'status': 'inactive', 'message': message,
                                                        'checked_at': int(time.time())}))
-        self.env.registry.clear_cache()   # hide the app menu again
+        self.env['ir.ui.menu'].clear_caches()   # hide the app menu again
 
     # -------------------------------------------------------------- licence
 
@@ -131,7 +132,7 @@ class AaiClient(models.AbstractModel):
             params.set_param(PARAM_SECRET, data['client_secret'])
         self._store_status(data)
         # the app menu is shown / hidden depending on the activation: rebuild the cached menus
-        self.env.registry.clear_cache()
+        self.env['ir.ui.menu'].clear_caches()
         return data
 
     def status(self):

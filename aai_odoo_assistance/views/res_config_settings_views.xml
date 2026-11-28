@@ -5,67 +5,110 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//form" position="inside">
-                <app data-string="AI Assistant" string="AI Assistant" name="aai_odoo_assistance" groups="base.group_system">
-                    <block title="Subscription" name="aai_assistant_subscription">
-                        <field name="aai_is_activated" invisible="1"/>
-                        <field name="aai_key_changed" invisible="1"/>
-                        <div class="alert alert-warning w-100 mb-3" role="alert" invisible="aai_is_activated">
-                            <strong>The AI Assistant is not activated yet.</strong>
-                            Click <strong>Activate</strong> below to turn it on: the chat window and the
-                            AI Assistant app then appear for the users of the <em>AI Assistant User</em> group.
-                            A free demo key is already filled in; replace it with your subscription key if you have one.
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block"
+                     data-string="AI Assistant"
+                     string="AI Assistant"
+                     data-key="aai_odoo_assistance"
+                     groups="base.group_system">
+                    <field name="aai_is_activated" invisible="1"/>
+                    <field name="aai_key_changed" invisible="1"/>
+
+                    <h2>Subscription</h2>
+                    <div class="alert alert-warning w-100 mb-3" role="alert"
+                         attrs="{'invisible': [('aai_is_activated', '=', True)]}">
+                        <strong>The AI Assistant is not activated yet.</strong>
+                        Click <strong>Activate</strong> below to turn it on: the chat window and the
+                        AI Assistant app then appear for users of the <em>AI Assistant User</em> group.
+                        A free demo key is already filled in; replace it with your subscription key if you have one.
+                    </div>
+                    <div class="row mt16 o_settings_container" name="aai_assistant_subscription">
+                        <div class="col-12 col-lg-6 o_setting_box" id="aai_license_key_setting">
+                            <div class="o_setting_right_pane">
+                                <label for="aai_license_key" string="Licence Key"/>
+                                <div class="text-muted">
+                                    The key provided by AAI Square for your subscription.
+                                </div>
+                                <div class="content-group mt16">
+                                    <field name="aai_license_key" password="True"
+                                           placeholder="AAI-XXXX-XXXX-XXXX"/>
+                                    <div class="mt8">
+                                        <button name="action_aai_activate" type="object" string="Activate"
+                                                class="btn-primary" icon="fa-check"
+                                                attrs="{'invisible': ['&amp;', ('aai_is_activated', '=', True), ('aai_key_changed', '=', False)]}"/>
+                                        <span class="text-success fw-bold me-3"
+                                              attrs="{'invisible': ['|', ('aai_is_activated', '=', False), ('aai_key_changed', '=', True)]}">
+                                            <i class="fa fa-check-circle me-1" title="Activated"/>
+                                            Activated for this database
+                                        </span>
+                                        <button name="action_aai_check_status" type="object" string="Check Status"
+                                                class="btn-link" icon="fa-refresh"
+                                                attrs="{'invisible': [('aai_status', '=', False)]}"/>
+                                    </div>
+                                    <div class="text-warning small mt8"
+                                         attrs="{'invisible': ['|', ('aai_is_activated', '=', False), ('aai_key_changed', '=', False)]}">
+                                        New key: click <strong>Activate</strong> to use it.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <setting id="aai_license_key" string="Licence Key"
-                                 help="The key provided by AAI Square for your subscription.">
-                            <field name="aai_license_key" password="True" placeholder="AAI-XXXX-XXXX-XXXX"/>
-                            <div class="mt-2">
-                                <!-- Activate: only needed before the first activation or for a new key -->
-                                <button name="action_aai_activate" type="object" string="Activate"
-                                        class="btn-primary" icon="fa-check"
-                                        invisible="aai_is_activated and not aai_key_changed"/>
-                                <span class="text-success fw-bold me-3"
-                                      invisible="not aai_is_activated or aai_key_changed">
-                                    <i class="fa fa-check-circle me-1" title="Activated"/>Activated for this database
-                                </span>
-                                <button name="action_aai_check_status" type="object" string="Check Status"
-                                        class="btn-link" icon="fa-refresh" invisible="not aai_status"/>
-                            </div>
-                            <div class="text-warning small mt-1" invisible="not aai_is_activated or not aai_key_changed">
-                                New key: click <strong>Activate</strong> to use it.
-                            </div>
-                        </setting>
-                        <setting id="aai_license_status" string="Status">
-                            <div>
+
+                        <div class="col-12 col-lg-6 o_setting_box" id="aai_license_status_setting">
+                            <div class="o_setting_right_pane">
+                                <div class="o_form_label">Status</div>
                                 <field name="aai_is_active" invisible="1"/>
-                                <field name="aai_status" widget="badge" nolabel="1"
-                                       decoration-success="aai_is_active" decoration-warning="not aai_is_active"/>
+                                <div>
+                                    <field name="aai_status" widget="badge" nolabel="1"
+                                           decoration-success="aai_is_active"
+                                           decoration-warning="not aai_is_active"/>
+                                </div>
+                                <div class="text-muted"
+                                     attrs="{'invisible': [('aai_status_message', '=', False)]}">
+                                    <field name="aai_status_message" nolabel="1"/>
+                                </div>
+                                <div class="mt8" attrs="{'invisible': [('aai_plan', '=', False)]}">
+                                    Plan: <field name="aai_plan" nolabel="1" class="fw-bold"/>
+                                </div>
+                                <div attrs="{'invisible': [('aai_valid_until', '=', False)]}">
+                                    Valid until: <field name="aai_valid_until" nolabel="1" class="fw-bold"/>
+                                </div>
+                                <div attrs="{'invisible': [('aai_questions_left', '=', False)]}">
+                                    Questions left:
+                                    <field name="aai_questions_left" nolabel="1" class="fw-bold"/>
+                                </div>
                             </div>
-                            <div class="text-muted" invisible="not aai_status_message">
-                                <field name="aai_status_message" nolabel="1"/>
+                        </div>
+                    </div>
+
+                    <h2>Chat</h2>
+                    <div class="row mt16 o_settings_container" name="aai_assistant_chat">
+                        <div class="col-12 col-lg-6 o_setting_box" id="aai_load_history_setting">
+                            <div class="o_setting_left_pane">
+                                <field name="aai_load_history"/>
                             </div>
-                            <div class="mt-1" invisible="not aai_plan">
-                                Plan: <field name="aai_plan" nolabel="1" class="fw-bold"/>
+                            <div class="o_setting_right_pane">
+                                <label for="aai_load_history"/>
+                                <div class="text-muted">
+                                    When opening the chat, show the user's last conversation. If disabled,
+                                    every chat opens with a new conversation.
+                                </div>
                             </div>
-                            <div invisible="not aai_valid_until">
-                                Valid until: <field name="aai_valid_until" nolabel="1" class="fw-bold"/>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box" id="aai_backend_url_setting"
+                             groups="base.group_no_one">
+                            <div class="o_setting_right_pane">
+                                <label for="aai_backend_url" string="AI Service URL"/>
+                                <div class="text-muted">
+                                    Developer mode only. Leave empty to use the AAI Square service.
+                                </div>
+                                <div class="content-group mt16">
+                                    <field name="aai_backend_url"
+                                           placeholder="https://odoo.aaisquare.com/assistance-backend"/>
+                                </div>
                             </div>
-                            <div invisible="not aai_questions_left">
-                                Questions left: <field name="aai_questions_left" nolabel="1" class="fw-bold"/>
-                            </div>
-                        </setting>
-                    </block>
-                    <block title="Chat" name="aai_assistant_chat">
-                        <setting id="aai_load_history"
-                                 help="When opening the chat, show the user's last conversation. Unchecked: every time the chat opens, a new conversation starts.">
-                            <field name="aai_load_history"/>
-                        </setting>
-                        <setting id="aai_backend_url" string="AI Service URL" groups="base.group_no_one"
-                                 help="Developer mode only. Leave empty to use the AAI Square service.">
-                            <field name="aai_backend_url" placeholder="https://odoo.aaisquare.com/assistance-backend"/>
-                        </setting>
-                    </block>
-                </app>
+                        </div>
+                    </div>
+                </div>
             </xpath>
         </field>
     </record>

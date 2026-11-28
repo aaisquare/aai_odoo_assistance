@@ -44,10 +44,14 @@
                             <group>
                                 <field name="role"/>
                                 <field name="content"/>
-                                <field name="request_model" invisible="role != 'data_request'"/>
-                                <field name="request_method" invisible="role != 'data_request'"/>
-                                <field name="request_details" invisible="role != 'data_request'"/>
-                                <field name="result_count" invisible="role != 'data_request'"/>
+                                <field name="request_model"
+                                       attrs="{'invisible': [('role', '!=', 'data_request')]}"/>
+                                <field name="request_method"
+                                       attrs="{'invisible': [('role', '!=', 'data_request')]}"/>
+                                <field name="request_details"
+                                       attrs="{'invisible': [('role', '!=', 'data_request')]}"/>
+                                <field name="result_count"
+                                       attrs="{'invisible': [('role', '!=', 'data_request')]}"/>
                             </group>
                         </form>
                     </field>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="aai_odoo_assistance.ChatWidget">
+    <t t-name="aai_odoo_assistance.ChatWidget" owl="1">
         <div t-if="props.fullPage and !state.allowed" class="o_aai_assistant_denied">
             <t t-if="!activated">
                 <i class="fa fa-power-off fa-2x mb-3"/>
@@ -171,7 +171,7 @@
     </t>
 
     <!-- Full-page chat (client action, opened in a new tab or from the AI Assistant menu) -->
-    <t t-name="aai_odoo_assistance.ChatPage">
+    <t t-name="aai_odoo_assistance.ChatPage" owl="1">
         <div class="o_aai_assistant_page o_action">
             <AiAssistantChat fullPage="true"/>
         </div>

@@ -1,10 +1,10 @@
-# AI Assistant for Odoo 17.0, by AAI Square
+# AI Assistant for Odoo 16.0, by AAI Square
 
 Ask your Odoo anything in plain language. **AI Assistant** adds a chat window to Odoo that answers questions
 about your sales, purchases, invoices, stock, customers and CRM from your **live data**, with the access
 rights of the user who asks.
 
-> This branch is for **Odoo 17.0** (Community and Enterprise). Other versions: branches `17.0`, `18.0`, `19.0`.
+> This branch is for **Odoo 16.0** (Community and Enterprise).
 
 ![AI Assistant answering a question](aai_odoo_assistance/static/description/banner.png)
 
@@ -33,7 +33,7 @@ Odoo looks for modules **directly inside** each folder of its `addons_path`, so 
 **Option A: copy the module into your custom addons folder** (simplest)
 
 ```bash
-git clone -b 17.0 --single-branch https://github.com/aaisquare/aai_odoo_assistance.git /tmp/aai_odoo_assistance
+git clone -b 16.0 --single-branch https://github.com/aaisquare/aai_odoo_assistance.git /tmp/aai_odoo_assistance
 cp -r /tmp/aai_odoo_assistance/aai_odoo_assistance /path/to/your/custom-addons/
 ```
 
@@ -43,7 +43,7 @@ On Windows, copy the inner `aai_odoo_assistance` folder with the file explorer.
 
 ```bash
 cd /opt/odoo
-git clone -b 17.0 --single-branch https://github.com/aaisquare/aai_odoo_assistance.git
+git clone -b 16.0 --single-branch https://github.com/aaisquare/aai_odoo_assistance.git
 ```
 
 then in your Odoo configuration file (e.g. `odoo.conf`):
@@ -54,7 +54,7 @@ addons_path = /opt/odoo/odoo/addons,/opt/odoo/custom-addons,/opt/odoo/aai_odoo_a
 
 The path is the **repository** folder (the one containing `README.md`), not the module folder inside it.
 
-**Option C: Odoo.sh**: add the repository as a submodule of your project (branch `17.0`) and push; Odoo.sh adds it to
+**Option C: Odoo.sh**: add the repository as a submodule of your project (branch `16.0`) and push; Odoo.sh adds it to
 the addons path automatically.
 
 Then **restart Odoo**.
@@ -67,7 +67,7 @@ Then **restart Odoo**.
 
 After installing, the chat is **hidden**: nothing changes for your users until an administrator activates it.
 
-Requirements: Odoo 17.0 (Community or Enterprise), the Python `requests` library (included with Odoo),
+Requirements: Odoo 16.0 (Community or Enterprise), the Python `requests` library (included with Odoo),
 outgoing HTTPS access from the Odoo server to the AAI Square service.
 
 ## 2. Activate
