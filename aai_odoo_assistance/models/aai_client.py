@@ -20,8 +20,7 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
-DEFAULT_BACKEND_URL = 'http://localhost:8000/'
-# DEFAULT_BACKEND_URL = 'https://odoo.aaisquare.com/assistance-backend'
+DEFAULT_BACKEND_URL = 'https://odoo.aaisquare.com/assistance-backend'
 TIMEOUT = 90
 
 PARAM_KEY = 'aai_odoo_assistance.license_key'
