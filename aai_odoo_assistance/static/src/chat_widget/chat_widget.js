@@ -162,7 +162,9 @@ export class AiAssistantChat extends Component {
 
     async _call(route, params = {}) {
         // pass the user context so the active companies are honoured
-        return this.rpc(route, { ...params, context: this.user.context });
+        // silent: the chat shows its own "typing" dots; without it Odoo greys out the whole screen
+        // ("Loading...") when an answer takes more than 3 seconds
+        return this.rpc(route, { ...params, context: this.user.context }, { silent: true });
     }
 
     async _loadHistory(conversationId = false) {
