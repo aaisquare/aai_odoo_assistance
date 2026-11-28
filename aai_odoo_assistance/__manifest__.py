@@ -1,6 +1,6 @@
 {
     'name': 'AI Assistant by AAI Square',
-    'version': '19.0.1.0.0',
+    'version': '20.0.1.0.0',
     'summary': 'Ask questions about your Odoo data in plain language',
     'description': """
 AI Assistant by AAI Square
@@ -31,7 +31,7 @@ sent to AAI Square to register this database for the licence.
     'depends': ['base_setup', 'web'],
     'data': [
         'security/aai_assistant_security.xml',
-        'security/ir.model.access.csv',
+        'security/ir.access.csv',
         'views/res_config_settings_views.xml',
         'views/aai_assistant_conversation_views.xml',
         'views/aai_assistant_chat_views.xml',

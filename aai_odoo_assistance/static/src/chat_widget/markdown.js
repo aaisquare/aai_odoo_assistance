@@ -1,7 +1,13 @@
 /** @odoo-module **/
 
 import { markup } from "@odoo/owl";
-import { escape } from "@web/core/utils/strings";
+
+const HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#x27;" };
+
+/** HTML-escape plain text (own helper: Odoo 20 no longer exports `escape` from @web/core/utils/strings). */
+export function escape(text) {
+    return String(text ?? "").replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
+}
 
 /**
  * Minimal, safe Markdown renderer for assistant answers.

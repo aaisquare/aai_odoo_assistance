@@ -44,7 +44,7 @@ class AiAssistantController(http.Controller):
         conversation = Conversation
         if conversation_id:
             conversation = Conversation.search(domain + [('id', '=', int(conversation_id))], limit=1)
-        elif request.env['ir.config_parameter'].sudo().get_param('aai_odoo_assistance.load_history'):
+        elif request.env['ir.config_parameter'].sudo().get_bool('aai_odoo_assistance.load_history'):
             conversation = Conversation.search(domain, order='id desc', limit=1)
         if not conversation:
             return {'conversation_id': False, 'messages': []}

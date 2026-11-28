@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, markup, onWillStart, useEffect, useExternalListener, useRef, useState } from "@odoo/owl";
+import { Component, markup, onMounted, onWillStart, proxy, signal, t, useListener, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { rpc } from "@web/core/network/rpc";
@@ -8,8 +8,7 @@ import { user } from "@web/core/user";
 import { _t } from "@web/core/l10n/translation";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { session } from "@web/session";
-import { escape } from "@web/core/utils/strings";
-import { linkify, renderMarkdown } from "./markdown";
+import { escape, linkify, renderMarkdown } from "./markdown";
 
 const GROUP = "aai_odoo_assistance.group_aai_assistant_user";
 const PAGE_ACTION = "aai_odoo_assistance.action_aai_assistant_chat";
@@ -19,27 +18,27 @@ const { DateTime } = luxon;
 const SUGGESTION_GROUPS = [
     {
         title: _t("Sales"),
-        icon: "fa-shopping-cart",
+        icon: "shopping_cart",
         items: [_t("Show me all pending quotations"), _t("Top 5 customers this month")],
     },
     {
         title: _t("Purchases"),
-        icon: "fa-truck",
+        icon: "local_shipping",
         items: [_t("Which purchase orders are waiting for vendor bills?")],
     },
     {
         title: _t("Accounting"),
-        icon: "fa-money",
+        icon: "payments",
         items: [_t("Which customers have overdue payments?")],
     },
     {
         title: _t("Inventory"),
-        icon: "fa-cubes",
+        icon: "inventory_2",
         items: [_t("Which deliveries are late?"), _t("How much stock do we have of product…")],
     },
     {
         title: _t("Customers"),
-        icon: "fa-users",
+        icon: "group",
         items: [_t("Show me the profile of customer…")],
     },
 ];
@@ -55,27 +54,27 @@ let nextLocalId = 1;
  */
 export class AiAssistantChat extends Component {
     static template = "aai_odoo_assistance.ChatWidget";
-    static props = {
-        fullPage: { type: Boolean, optional: true },
-    };
+    // Odoo 20 / Owl 3: props are declared with useProps, refs are signals, state is a proxy
+    props = useProps({ fullPage: t.boolean().optional() });
+    listRef = signal.ref();
+    inputRef = signal.ref();
+    // text being typed: a signal, as Owl 3's t-model requires (read: this.input(), write: this.input.set())
+    input = signal("", { type: t.string() });
 
     setup() {
         this.rpc = rpc;     // Odoo 18: the "rpc" and "user" services became plain imports
         this.user = user;
         this.notification = useService("notification");
         this.suggestionGroups = SUGGESTION_GROUPS;
-        this.state = useState({
+        this.state = proxy({
             allowed: false,
             open: Boolean(this.props.fullPage),
             expanded: false,
             loaded: false,
             loading: false,
-            input: "",
             conversationId: false,
             messages: [],
         });
-        this.listRef = useRef("list");
-        this.inputRef = useRef("input");
 
         onWillStart(async () => {
             // hidden until an administrator activates the assistant in Settings (see ir_http.session_info)
@@ -87,28 +86,14 @@ export class AiAssistantChat extends Component {
             }
         });
 
-        // welcome screen: start at the top; conversation: follow the latest message
-        useEffect(
-            () => {
-                const el = this.listRef.el;
-                if (el) {
-                    const empty = !this.state.messages.length && !this.state.loading;
-                    el.scrollTo({ top: empty ? 0 : el.scrollHeight, behavior: "smooth" });
-                }
-            },
-            () => [this.state.open, this.state.messages.length, this.state.loading]
-        );
+        onMounted(() => {
+            if (this.props.fullPage && this.state.allowed) {
+                this._scrollToEnd();
+                this._focusInput();
+            }
+        });
 
-        useEffect(
-            () => {
-                if (this.props.fullPage && this.state.allowed) {
-                    this._focusInput();
-                }
-            },
-            () => []
-        );
-
-        useExternalListener(window, "keydown", (ev) => {
+        useListener(window, "keydown", (ev) => {
             if (ev.key === "Escape" && this.state.open && !this.props.fullPage) {
                 this.state.open = false;
             }
@@ -126,7 +111,7 @@ export class AiAssistantChat extends Component {
     }
 
     get canSend() {
-        return !this.state.loading && this.state.input.trim().length > 0;
+        return !this.state.loading && this.input().trim().length > 0;
     }
 
     renderContent(msg) {
@@ -173,6 +158,7 @@ export class AiAssistantChat extends Component {
             const res = await this._call("/aai_odoo_assistance/history", { conversation_id: conversationId });
             this.state.conversationId = res.conversation_id;
             this.state.messages = res.messages.map((m) => this._makeMessage(m));
+            this._scrollToEnd();
         } catch {
             // history is a convenience, the chat still works without it
         }
@@ -198,6 +184,7 @@ export class AiAssistantChat extends Component {
             await this._loadHistory();
         }
         if (this.state.open) {
+            this._scrollToEnd();
             this._focusInput();
         }
     }
@@ -218,7 +205,7 @@ export class AiAssistantChat extends Component {
         }
         this.state.conversationId = false;
         this.state.messages = [];
-        this.state.input = "";
+        this.input.set("");
         if (this.props.fullPage) {
             this._setUrlConversation(false);
         }
@@ -248,23 +235,24 @@ export class AiAssistantChat extends Component {
     useSuggestion(text) {
         if (text.endsWith("…")) {
             // template question: let the user finish it
-            this.state.input = text.slice(0, -1);
+            this.input.set(text.slice(0, -1));
             this._focusInput();
             return;
         }
-        this.state.input = text;
+        this.input.set(text);
         this.send();
     }
 
     async send() {
-        const text = this.state.input.trim();
+        const text = this.input().trim();
         if (!text || this.state.loading) {
             return;
         }
-        this.state.input = "";
+        this.input.set("");
         this._autoResize();
         this.state.messages.push(this._makeMessage({ role: "user", content: text }));
         this.state.loading = true;
+        this._scrollToEnd();
         try {
             const res = await this._call("/aai_odoo_assistance/chat", {
                 message: text,
@@ -283,6 +271,7 @@ export class AiAssistantChat extends Component {
             this._pushError(e.data?.message || e.message || _t("Something went wrong. Please try again."));
         } finally {
             this.state.loading = false;
+            this._scrollToEnd();
             this._focusInput();
         }
     }
@@ -294,11 +283,22 @@ export class AiAssistantChat extends Component {
     }
 
     _focusInput() {
-        setTimeout(() => this.inputRef.el?.focus());
+        setTimeout(() => this.inputRef()?.focus());
+    }
+
+    /** Welcome screen: top; conversation: the latest message (after the DOM update). */
+    _scrollToEnd() {
+        setTimeout(() => {
+            const el = this.listRef();
+            if (el) {
+                const empty = !this.state.messages.length && !this.state.loading;
+                el.scrollTo({ top: empty ? 0 : el.scrollHeight, behavior: "smooth" });
+            }
+        });
     }
 
     _autoResize() {
-        const el = this.inputRef.el;
+        const el = this.inputRef();
         if (el) {
             setTimeout(() => {
                 el.style.height = "auto";
@@ -323,7 +323,6 @@ export class AiAssistantChat extends Component {
 export class AiAssistantChatPage extends Component {
     static template = "aai_odoo_assistance.ChatPage";
     static components = { AiAssistantChat };
-    static props = ["*"];
 }
 
 registry.category("main_components").add("aai_odoo_assistance.ChatWidget", { Component: AiAssistantChat });

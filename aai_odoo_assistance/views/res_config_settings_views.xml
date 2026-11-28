@@ -22,14 +22,14 @@
                             <div class="mt-2">
                                 <!-- Activate: only needed before the first activation or for a new key -->
                                 <button name="action_aai_activate" type="object" string="Activate"
-                                        class="btn-primary" icon="fa-check"
+                                        class="btn-primary" icon="check"
                                         invisible="aai_is_activated and not aai_key_changed"/>
                                 <span class="text-success fw-bold me-3"
                                       invisible="not aai_is_activated or aai_key_changed">
-                                    <i class="fa fa-check-circle me-1" title="Activated"/>Activated for this database
+                                    <i class="oi me-1" data-icon="check_circle" title="Activated"/>Activated for this database
                                 </span>
                                 <button name="action_aai_check_status" type="object" string="Check Status"
-                                        class="btn-link" icon="fa-refresh" invisible="not aai_status"/>
+                                        class="btn-link" icon="refresh" invisible="not aai_status"/>
                             </div>
                             <div class="text-warning small mt-1" invisible="not aai_is_activated or not aai_key_changed">
                                 New key: click <strong>Activate</strong> to use it.

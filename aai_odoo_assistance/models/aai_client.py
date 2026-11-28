@@ -39,22 +39,22 @@ class AaiClient(models.AbstractModel):
         return self.env['ir.config_parameter'].sudo()
 
     def _backend_url(self):
-        return (self._params().get_param(PARAM_URL) or DEFAULT_BACKEND_URL).rstrip('/')
+        return (self._params().get_str(PARAM_URL) or DEFAULT_BACKEND_URL).rstrip('/')
 
     def _license_key(self):
-        return (self._params().get_param(PARAM_KEY) or '').strip()
+        return (self._params().get_str(PARAM_KEY) or '').strip()
 
     @api.model
     def _is_activated(self):
         """Activated = an administrator clicked "Activate" and the backend accepted the key
         (it returned a signing secret). Until then the chat window and the app menu are hidden."""
-        return bool(self._params().get_param(PARAM_SECRET))
+        return bool(self._params().get_str(PARAM_SECRET))
 
     def _odoo_info(self):
         params = self._params()
         return {
-            'db_uuid': params.get_param('database.uuid'),
-            'base_url': params.get_param('web.base.url'),
+            'db_uuid': params.get_str('database.uuid'),
+            'base_url': params.get_str('web.base.url'),
             'odoo_version': release.version,
             # read from __manifest__.py, so it always matches the installed branch (17.0 / 18.0 / 19.0)
             'module_version': get_manifest('aai_odoo_assistance').get('version') or '',
@@ -75,7 +75,7 @@ class AaiClient(models.AbstractModel):
         headers = {
             'Content-Type': 'application/json',
             'X-AAI-License': key,
-            'X-AAI-Database': self._params().get_param('database.uuid') or '',
+            'X-AAI-Database': self._params().get_str('database.uuid') or '',
             'X-AAI-Timestamp': timestamp,
             # server name: lets the backend notice one licensed database running on two servers
             'X-AAI-Instance': platform.node()[:100],
@@ -83,7 +83,7 @@ class AaiClient(models.AbstractModel):
         if signed:
             # no automatic activation: an administrator activates explicitly in Settings (that is also
             # when the installation is registered on the AAI Square side)
-            secret = self._params().get_param(PARAM_SECRET)
+            secret = self._params().get_str(PARAM_SECRET)
             if not secret:
                 raise UserError(_('The AI Assistant is not activated. An administrator must click "Activate" '
                                   'in Settings > AI Assistant.'))
@@ -115,10 +115,10 @@ class AaiClient(models.AbstractModel):
         _logger.warning('AAI service rejected the activation of this database: %s', message)
         with self.env.registry.cursor() as cr:
             params = self.env(cr=cr)['ir.config_parameter'].sudo()
-            params.set_param(PARAM_SECRET, False)
-            params.set_param(PARAM_STATUS, json.dumps({'status': 'inactive', 'message': message,
+            params.set_str(PARAM_SECRET, False)
+            params.set_str(PARAM_STATUS, json.dumps({'status': 'inactive', 'message': message,
                                                        'checked_at': int(time.time())}))
-        self.env.registry.clear_cache()   # hide the app menu again
+        self.env.transaction.invalidate_ormcache('default')   # hide the app menu again
 
     # -------------------------------------------------------------- licence
 
@@ -128,10 +128,10 @@ class AaiClient(models.AbstractModel):
         data = self._post('/v1/activate', payload, signed=False)
         params = self._params()
         if data.get('client_secret'):
-            params.set_param(PARAM_SECRET, data['client_secret'])
+            params.set_str(PARAM_SECRET, data['client_secret'])
         self._store_status(data)
         # the app menu is shown / hidden depending on the activation: rebuild the cached menus
-        self.env.registry.clear_cache()
+        self.env.transaction.invalidate_ormcache('default')
         return data
 
     def status(self):
@@ -142,7 +142,7 @@ class AaiClient(models.AbstractModel):
     def _store_status(self, data):
         status = {k: data.get(k) for k in ('status', 'message', 'plan', 'valid_until', 'questions_left', 'company')}
         status['checked_at'] = int(time.time())
-        self._params().set_param(PARAM_STATUS, json.dumps(status))
+        self._params().set_str(PARAM_STATUS, json.dumps(status))
 
     # ------------------------------------------------------------------- chat
 

@@ -1,82 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="aai_odoo_assistance.ChatWidget">
-        <div t-if="props.fullPage and !state.allowed" class="o_aai_assistant_denied">
-            <t t-if="!activated">
-                <i class="fa fa-power-off fa-2x mb-3"/>
+        <div t-if="this.props.fullPage and !this.state.allowed" class="o_aai_assistant_denied">
+            <t t-if="!this.activated">
+                <i class="oi oi-2x mb-3" data-icon="power_settings_new"/>
                 <p>The AI Assistant is not activated yet. An administrator must click <strong>Activate</strong>
                     in Settings &gt; AI Assistant.</p>
             </t>
             <t t-else="">
-                <i class="fa fa-lock fa-2x mb-3"/>
+                <i class="oi oi-2x mb-3" data-icon="lock"/>
                 <p>You do not have access to the AI Assistant. Ask your administrator to add you to the
                     <strong>AI Assistant User</strong> group.</p>
             </t>
         </div>
-        <div t-if="state.allowed"
-             t-attf-class="o_aai_assistant d-print-none {{ props.fullPage ? 'o_aai_assistant_fullpage' : 'o_aai_assistant_floating' }}">
+        <div t-if="this.state.allowed"
+             t-attf-class="o_aai_assistant d-print-none {{ this.props.fullPage ? 'o_aai_assistant_fullpage' : 'o_aai_assistant_floating' }}">
 
             <!-- ============================== Panel ============================== -->
-            <div t-if="state.open"
-                 t-attf-class="o_aai_assistant_panel {{ state.expanded ? 'o_aai_assistant_expanded' : '' }}"
+            <div t-if="this.state.open"
+                 t-attf-class="o_aai_assistant_panel {{ this.state.expanded ? 'o_aai_assistant_expanded' : '' }}"
                  role="dialog" aria-label="AI Assistant">
 
                 <!-- Header -->
                 <header class="o_aai_assistant_header">
                     <div class="o_aai_assistant_avatar o_aai_assistant_avatar_bot">
-                        <i class="fa fa-magic"/>
+                        <i class="oi" data-icon="wand_stars"/>
                     </div>
                     <div class="o_aai_assistant_title">
                         <div class="o_aai_assistant_name">AI Assistant</div>
                         <div class="o_aai_assistant_status">
-                            <t t-if="state.loading">Looking it up…</t>
+                            <t t-if="this.state.loading">Looking it up…</t>
                             <t t-else="">Live Odoo data</t>
                         </div>
                     </div>
                     <div class="o_aai_assistant_header_actions">
                         <button class="o_aai_assistant_icon_btn" title="New conversation"
-                                t-on-click="newChat" t-att-disabled="state.loading">
-                            <i class="fa fa-pencil-square-o"/>
-                            <span t-if="props.fullPage" class="o_aai_assistant_new_label">New conversation</span>
+                                t-on-click="this.newChat" t-att-disabled="this.state.loading">
+                            <i class="oi" data-icon="edit_square"/>
+                            <span t-if="this.props.fullPage" class="o_aai_assistant_new_label">New conversation</span>
                         </button>
-                        <t t-if="!props.fullPage">
+                        <t t-if="!this.props.fullPage">
                             <button class="o_aai_assistant_icon_btn d-none d-md-inline-flex"
-                                    t-att-title="state.expanded ? 'Collapse' : 'Expand'" t-on-click="toggleExpand">
-                                <i t-attf-class="fa {{ state.expanded ? 'fa-compress' : 'fa-expand' }}"/>
+                                    t-att-title="this.state.expanded ? 'Collapse' : 'Expand'" t-on-click="this.toggleExpand">
+                                <i class="oi" t-att-data-icon="this.state.expanded ? 'fullscreen_exit' : 'fullscreen'"/>
                             </button>
                             <button class="o_aai_assistant_icon_btn" title="Open in new tab"
-                                    t-on-click="openInNewTab">
-                                <i class="fa fa-external-link"/>
+                                    t-on-click="this.openInNewTab">
+                                <i class="oi" data-icon="open_in_new"/>
                             </button>
-                            <button class="o_aai_assistant_icon_btn" title="Close (Esc)" t-on-click="toggle">
-                                <i class="fa fa-times"/>
+                            <button class="o_aai_assistant_icon_btn" title="Close (Esc)" t-on-click="this.toggle">
+                                <i class="oi" data-icon="close"/>
                             </button>
                         </t>
                     </div>
                 </header>
 
                 <!-- Messages -->
-                <div class="o_aai_assistant_messages" t-ref="list">
+                <div class="o_aai_assistant_messages" t-ref="this.listRef">
 
                     <!-- Welcome screen -->
-                    <div t-if="!state.messages.length" class="o_aai_assistant_welcome">
-                        <div class="o_aai_assistant_welcome_icon"><i class="fa fa-magic"/></div>
-                        <h5 class="mb-1">Hello<t t-if="firstName">, <t t-esc="firstName"/></t>!</h5>
+                    <div t-if="!this.state.messages.length" class="o_aai_assistant_welcome">
+                        <div class="o_aai_assistant_welcome_icon"><i class="oi" data-icon="wand_stars"/></div>
+                        <h5 class="mb-1">Hello<t t-if="this.firstName">, <t t-out="this.firstName"/></t>!</h5>
                         <p class="text-muted mb-3">
                             Ask me about customers, sales, purchases, invoices, stock, projects and more.
                             I can also fetch PDF documents for you.
                         </p>
                         <div class="o_aai_assistant_suggestions">
-                            <t t-foreach="suggestionGroups" t-as="group" t-key="group.title">
+                            <t t-foreach="this.suggestionGroups" t-as="group" t-key="group.title">
                                 <div class="o_aai_assistant_suggestion_group">
                                     <div class="o_aai_assistant_suggestion_title">
-                                        <i t-attf-class="fa {{ group.icon }} me-1"/>
-                                        <t t-esc="group.title"/>
+                                        <i class="oi me-1" t-att-data-icon="group.icon"/>
+                                        <t t-out="group.title"/>
                                     </div>
                                     <button t-foreach="group.items" t-as="item" t-key="item"
                                             class="o_aai_assistant_chip"
                                             t-on-click="() => this.useSuggestion(item)">
-                                        <t t-esc="item"/>
+                                        <t t-out="item"/>
                                     </button>
                                 </div>
                             </t>
@@ -84,46 +84,46 @@
                     </div>
 
                     <!-- Conversation -->
-                    <t t-foreach="state.messages" t-as="msg" t-key="msg.id">
+                    <t t-foreach="this.state.messages" t-as="msg" t-key="msg.id">
                         <div t-attf-class="o_aai_assistant_msg o_aai_assistant_msg_{{ msg.role }}">
                             <img t-if="msg.role === 'user'" class="o_aai_assistant_avatar"
-                                 t-att-src="userAvatar" alt=""/>
+                                 t-att-src="this.userAvatar" alt=""/>
                             <div t-elif="msg.role === 'error'" class="o_aai_assistant_avatar o_aai_assistant_avatar_error">
-                                <i class="fa fa-exclamation"/>
+                                <i class="oi" data-icon="priority_high"/>
                             </div>
                             <div t-else="" class="o_aai_assistant_avatar o_aai_assistant_avatar_bot">
-                                <i class="fa fa-magic"/>
+                                <i class="oi" data-icon="wand_stars"/>
                             </div>
 
                             <div class="o_aai_assistant_body">
                                 <div class="o_aai_assistant_bubble">
-                                    <div class="o_aai_assistant_text" t-out="renderContent(msg)"/>
+                                    <div class="o_aai_assistant_text" t-out="this.renderContent(msg)"/>
 
                                     <!-- PDF documents -->
-                                    <div t-if="pdfLinks(msg).length" class="o_aai_assistant_files">
-                                        <a t-foreach="pdfLinks(msg)" t-as="link" t-key="link.url"
+                                    <div t-if="this.pdfLinks(msg).length" class="o_aai_assistant_files">
+                                        <a t-foreach="this.pdfLinks(msg)" t-as="link" t-key="link.url"
                                            t-att-href="link.url" target="_blank" class="o_aai_assistant_file">
-                                            <span class="o_aai_assistant_file_icon"><i class="fa fa-file-pdf-o"/></span>
-                                            <span class="o_aai_assistant_file_name" t-esc="link.label"/>
-                                            <i class="fa fa-download o_aai_assistant_file_action"/>
+                                            <span class="o_aai_assistant_file_icon"><i class="oi" data-icon="picture_as_pdf"/></span>
+                                            <span class="o_aai_assistant_file_name" t-out="link.label"/>
+                                            <i class="oi o_aai_assistant_file_action" data-icon="download"/>
                                         </a>
                                     </div>
 
                                     <!-- Records to open in Odoo -->
-                                    <div t-if="recordLinks(msg).length" class="o_aai_assistant_records">
-                                        <a t-foreach="recordLinks(msg)" t-as="link" t-key="link.url"
+                                    <div t-if="this.recordLinks(msg).length" class="o_aai_assistant_records">
+                                        <a t-foreach="this.recordLinks(msg)" t-as="link" t-key="link.url"
                                            t-att-href="link.url" target="_blank" class="o_aai_assistant_chip">
-                                            <i class="fa fa-external-link me-1"/>
-                                            <t t-esc="link.label"/>
+                                            <i class="oi me-1" data-icon="open_in_new"/>
+                                            <t t-out="link.label"/>
                                         </a>
                                     </div>
                                 </div>
 
                                 <div class="o_aai_assistant_meta">
-                                    <span t-esc="formatTime(msg)"/>
+                                    <span t-out="this.formatTime(msg)"/>
                                     <button t-if="msg.role === 'assistant'" class="o_aai_assistant_copy"
                                             title="Copy answer" t-on-click="() => this.copy(msg)">
-                                        <i class="fa fa-clone"/> Copy
+                                        <i class="oi" data-icon="content_copy"/> Copy
                                     </button>
                                 </div>
                             </div>
@@ -131,8 +131,8 @@
                     </t>
 
                     <!-- Typing indicator -->
-                    <div t-if="state.loading" class="o_aai_assistant_msg o_aai_assistant_msg_assistant">
-                        <div class="o_aai_assistant_avatar o_aai_assistant_avatar_bot"><i class="fa fa-magic"/></div>
+                    <div t-if="this.state.loading" class="o_aai_assistant_msg o_aai_assistant_msg_assistant">
+                        <div class="o_aai_assistant_avatar o_aai_assistant_avatar_bot"><i class="oi" data-icon="wand_stars"/></div>
                         <div class="o_aai_assistant_body">
                             <div class="o_aai_assistant_bubble o_aai_assistant_typing">
                                 <span/><span/><span/>
@@ -144,15 +144,15 @@
                 <!-- Composer -->
                 <footer class="o_aai_assistant_composer">
                     <div class="o_aai_assistant_input_wrap">
-                        <textarea t-ref="input" rows="1"
+                        <textarea t-ref="this.inputRef" rows="1"
                                   placeholder="Ask about orders, invoices, stock…"
-                                  t-model="state.input"
-                                  t-on-input="onInput"
-                                  t-on-keydown="onKeydown"
-                                  t-att-disabled="state.loading"/>
-                        <button class="o_aai_assistant_send" t-on-click="send"
-                                t-att-disabled="!canSend" title="Send (Enter)">
-                            <i class="fa fa-paper-plane"/>
+                                  t-model="this.input"
+                                  t-on-input="this.onInput"
+                                  t-on-keydown="this.onKeydown"
+                                  t-att-disabled="this.state.loading"/>
+                        <button class="o_aai_assistant_send" t-on-click="this.send"
+                                t-att-disabled="!this.canSend" title="Send (Enter)">
+                            <i class="oi" data-icon="send"/>
                         </button>
                     </div>
                     <div class="o_aai_assistant_hint">
@@ -162,9 +162,9 @@
             </div>
 
             <!-- ============================== Launcher ============================== -->
-            <button t-elif="!props.fullPage" class="o_aai_assistant_launcher" title="Ask the AI Assistant"
-                    aria-label="Open AI Assistant" t-on-click="toggle">
-                <i class="fa fa-magic"/>
+            <button t-elif="!this.props.fullPage" class="o_aai_assistant_launcher" title="Ask the AI Assistant"
+                    aria-label="Open AI Assistant" t-on-click="this.toggle">
+                <i class="oi" data-icon="wand_stars"/>
                 <span class="o_aai_assistant_launcher_label">Ask AI</span>
             </button>
         </div>

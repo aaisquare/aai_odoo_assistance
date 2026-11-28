@@ -1,0 +1,5 @@
+id,name,model_id,group_id/id,operation,domain
+access_ai_conversation_user,AI Assistant: own conversations,aai.assistant.conversation,group_aai_assistant_user,cru,"[('user_id', '=', user.id)]"
+access_ai_message_user,AI Assistant: own messages,aai.assistant.message,group_aai_assistant_user,cr,"[('conversation_id.user_id', '=', user.id)]"
+access_ai_conversation_admin,AI Assistant: all conversations (admin),aai.assistant.conversation,base.group_system,crud,
+access_ai_message_admin,AI Assistant: all messages (admin),aai.assistant.message,base.group_system,crud,

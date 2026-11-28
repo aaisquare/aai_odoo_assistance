@@ -38,7 +38,7 @@ class ResConfigSettings(models.TransientModel):
 
     @api.depends('aai_license_key')
     def _compute_aai_status(self):
-        raw = self.env['ir.config_parameter'].sudo().get_param(PARAM_STATUS)
+        raw = self.env['ir.config_parameter'].sudo().get_str(PARAM_STATUS)
         try:
             data = json.loads(raw) if raw else {}
         except ValueError:
@@ -61,19 +61,19 @@ class ResConfigSettings(models.TransientModel):
 
     @api.depends('aai_license_key')
     def _compute_aai_key_changed(self):
-        saved = (self.env['ir.config_parameter'].sudo().get_param(PARAM_KEY) or '').strip()
+        saved = (self.env['ir.config_parameter'].sudo().get_str(PARAM_KEY) or '').strip()
         for settings in self:
             settings.aai_key_changed = (settings.aai_license_key or '').strip() != saved
 
     def set_values(self):
         params = self.env['ir.config_parameter'].sudo()
-        old_key = (params.get_param(PARAM_KEY) or '').strip()
+        old_key = (params.get_str(PARAM_KEY) or '').strip()
         super().set_values()
         if (self.aai_license_key or '').strip() != old_key:
             # a new key must be activated again: forget the old secret and status (hides the chat until then)
-            params.set_param(PARAM_SECRET, False)
-            params.set_param(PARAM_STATUS, False)
-            self.env.registry.clear_cache()   # app menu visibility
+            params.set_str(PARAM_SECRET, False)
+            params.set_str(PARAM_STATUS, False)
+            self.env.transaction.invalidate_ormcache('default')   # app menu visibility
 
     def action_aai_activate(self):
         self.set_values()

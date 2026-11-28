@@ -127,8 +127,8 @@ class AaiGateway(models.AbstractModel):
             raise AccessError(_('Only reading data is allowed.'))
         Model = self._check_model(model).with_context(**self._safe_context(kw.get('context')))
 
-        if (model, method) in EXTRA_METHODS:
-            return getattr(Model, method)()
+        if (model, method) == ('ir.actions.report', 'get_wkhtmltopdf_state'):
+            return Model.get_pdf_engine_state(Model._get_pdf_engine())
         if method == 'check_access_rights':          # name kept for the backend; Odoo 18 API: has_access
             return Model.has_access(kw.get('operation', 'read'))
         if method == 'fields_get':
@@ -155,18 +155,45 @@ class AaiGateway(models.AbstractModel):
             for spec in aggregates + groupby:
                 if BLOCKED_FIELD.search(spec.split(':')[0]):
                     raise AccessError(_('This data is not available to the AI Assistant.'))
-            # Odoo 19 marks read_group as deprecated (@api.deprecated) but keeps it as the method returning
-            # the formatted groups the backend expects. Call the undecorated base method to avoid the warning;
-            # a model overriding read_group (no __wrapped__) still goes through its override.
-            read_group = getattr(type(Model).read_group, '__wrapped__', None)
-            if read_group:
-                return read_group(Model, domain, aggregates, groupby, offset=int(kw.get('offset') or 0),
-                                  limit=self._limit(kw.get('limit')), orderby=kw.get('orderby') or False,
-                                  lazy=bool(kw.get('lazy', False)))
-            return Model.read_group(domain, aggregates, groupby, offset=int(kw.get('offset') or 0),
-                                    limit=self._limit(kw.get('limit')), orderby=kw.get('orderby') or False,
-                                    lazy=bool(kw.get('lazy', False)))
+            return self._grouped(Model, domain, aggregates, groupby, offset=int(kw.get('offset') or 0),
+                                 limit=self._limit(kw.get('limit')), orderby=kw.get('orderby') or '')
         raise AccessError(_('Only reading data is allowed.'))
+
+    def _grouped(self, Model, domain, aggregates, groupby, offset, limit, orderby):
+        """Totals per group, in the classic read_group format the AAI service expects:
+        ``[{<groupby>: value, <field>: aggregate, '__count': n}, ...]``.
+
+        Odoo 20: ``read_group`` is the raw tuple API, ``formatted_read_group`` returns dicts keyed by the
+        aggregate spec ('amount_total:sum'): rename them to the field ('amount_total') and translate the
+        order ('amount_total desc' -> 'amount_total:sum desc').
+        """
+        specs = {}  # result key -> aggregate spec
+        for spec in aggregates:
+            name, _sep, func = spec.partition(':')
+            if name == '__count':
+                continue
+            if not func:
+                field = Model._fields.get(name)
+                if not field or not field.aggregator:
+                    continue
+                func = field.aggregator
+            specs[name] = f'{name}:{func}'
+        order_terms = []
+        for term in (orderby or '').split(','):
+            term = term.strip()
+            if not term:
+                continue
+            key, _sep, direction = term.partition(' ')
+            order_terms.append(f'{specs.get(key, key)} {direction}'.strip())
+        rows = Model.formatted_read_group(domain, groupby, list(specs.values()) + ['__count'],
+                                          offset=offset, limit=limit, order=', '.join(order_terms) or None)
+        result = []
+        for row in rows:
+            group = {spec: row.get(spec) for spec in groupby}
+            group.update({name: row.get(spec) for name, spec in specs.items()})
+            group['__count'] = row.get('__count', 0)
+            result.append(group)
+        return result
 
     # ------------------------------------------------------------------ logging
 
