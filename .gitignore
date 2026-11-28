@@ -4,8 +4,4 @@ __pycache__/
 .idea/
 .vscode/
 # local development only
-nodemon.json
-nodemon16.json
-nodemon17.json
-nodemon19.json
-nodemon18.json
+nodemon*.json
